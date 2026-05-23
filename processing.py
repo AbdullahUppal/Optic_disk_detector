@@ -38,6 +38,20 @@ def identify_candidate_area(image, vessel_map):
     # cv.imshow("threshold_vessel", updated_vessel)
     # cv.waitKey(0)
 
+# Update it's implementation to get biggest white ares.
+    def ccaf(imgstr, Vset, value):
+        img1 = cv.imread(imgstr, 0)
+        label = np.zeros((img1.shape[0], img1.shape[1], 3), dtype='int')
+        # label = cv.imread(imgstr)
+        for x in range(0, img1.shape[0]-1):
+            for y in range(0, img1.shape[1]-1):
+                if img1[x][y] in Vset:
+                    if img1[x-1][y] in Vset or img1[x][y-1] in Vset:
+                        label[x][y] = value
+                    else:
+                        label[x][y] = value
+        return np.uint8(label)
+    
 if __name__ == "__main__":
 
     RESIZE = 1
