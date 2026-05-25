@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+from constants import FUNDUS_IMAGES_PATH, VESSEL_STRUCTURE_PATH, RESULT_PATH
 
 def pre_process(image, vessel, resize=None):
    
@@ -87,35 +88,24 @@ def identify_central_area(img1):
 
     return np.uint8(final_area_img)
 
-    
-if __name__ == "__main__":
 
-    RESIZE = 1
+def main_process(retina_image_path, vessel_image_path, resize):
 
-    vessel = cv.imread("Blood vessels/1ffa92e4-8d87-11e8-9daf-6045cb817f5b._bin_seg.png", cv.IMREAD_GRAYSCALE)
+    img = cv.imread(FUNDUS_IMAGES_PATH + retina_image_path)
+    vessel = cv.imread(VESSEL_STRUCTURE_PATH + vessel_image_path, cv.IMREAD_GRAYSCALE)
 
-    image = cv.imread("Fundus image/01ffa92e4-8d87-11e8-9daf-6045cb817f5b..JPG")
-
-    # best possible channel for further processing 
-    # cv.imshow("Image",image)
-    # cv.imshow("ImageC1", image[:,:,0])
-    # cv.imshow("ImageC2", image[:,:,1])
-    # cv.imshow("ImageC3",image[:,:,2])
-    # cv.waitKey(0)
-    # cv.destroyAllWindows()
-
-    if RESIZE:
+    if resize:
         vessel = resize_image(vessel)
-        image_rbg = resize_image(image)
+        img = resize_image(img)
 
-    image = image[:,:,2]
+    image = img[:,:,2]
 
-    processed_img, processed_vessel = pre_process(image, vessel, resize=RESIZE)
+    processed_img, processed_vessel = pre_process(image, vessel, resize=resize)
 
-    cx, cy = identify_candidate_area(image=processed_img, vessel_map=vessel)
+    cx, cy = identify_candidate_area(image=processed_img, vessel_map=processed_vessel)
 
     cv.drawMarker(
-        image_rbg,
+        img,
         (cx, cy),
         (0, 0, 0),
         markerType=cv.MARKER_CROSS,
@@ -123,12 +113,10 @@ if __name__ == "__main__":
         thickness=2,
         line_type=cv.LINE_AA,
     )
-    cv.imshow("circled image", image_rbg)
-    cv.waitKey()
-
-
-
-
-
-
     
+    if RESULT_PATH:
+        cv.imwrite(RESULT_PATH+retina_image_path,img)
+
+    return img, cx, cy
+
+
